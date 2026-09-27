@@ -1,0 +1,17 @@
+[Unit]
+# Описание таймера.
+Description=Run log monitor every 30 seconds.
+
+[Timer]
+# Первый запуск: через 10 секунд после загрузки системы.
+OnBootSec=10s
+# После каждого запуска сервиса ждать 30 секунд и снова запустить его.
+OnUnitActiveSec=30s
+# Допустимое отклонение времени запуска — не более 1 секунды.
+AccuracySec=1s
+# Какой systemd-сервис запускать этим таймером.
+Unit=log-monitor.service
+
+[Install]
+# При включении таймера запускать его вместе с timers.target.
+WantedBy=timers.target

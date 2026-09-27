@@ -1,0 +1,11 @@
+[Unit]
+# Описание systemd-сервиса.
+Description=Check a log file for a keyword
+# Запускать сервис после того, как локальные файловые системы смонтированы.
+After=local-fs.target
+
+[Service]
+# Сервис запускается один раз и после завершения процесса считается выполненным.
+Type=oneshot
+# Команда, которую systemd должен выполнить при запуске сервиса.
+ExecStart=/usr/local/bin/log-monitor.sh

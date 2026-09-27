@@ -1,0 +1,25 @@
+[Unit]
+# Описание systemd-сервиса.
+Description=spawn-fcgi FastCGI service
+# Запускать сервис после того, как сеть будет инициализирована.
+After=network.target
+
+[Service]
+# Сервис работает как обычный процесс, который запускается непосредственно systemd.
+Type=simple
+# Подключаем файл с переменными окружения. Знак "-" означает, что отсутствие этого файла не считается ошибкой.
+EnvironmentFile=-/etc/sysconfig/spawn-fcgi
+# Запускаем spawn-fcgi:
+# -n                 — не переходить в фоновый режим (foreground);
+# -a ${FCGI_ADDRESS} — адрес, на котором будет слушать FastCGI;
+# -p ${FCGI_PORT}    — порт FastCGI;
+# -f ${FCGI_PROGRAM} — FastCGI-программа, которую необходимо запустить.
+ExecStart=/usr/local/bin/spawn-fcgi -n -a ${FCGI_ADDRESS} -p ${FCGI_PORT} -f ${FCGI_PROGRAM}
+# Если процесс завершился с ошибкой, systemd автоматически перезапустит его.
+Restart=on-failure
+# Подождать 2 секунды перед повторным запуском.
+RestartSec=2
+
+[Install]
+# Сервис будет запускаться при переходе системы в обычный многопользовательский режим.
+WantedBy=multi-user.target

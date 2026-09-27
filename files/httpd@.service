@@ -1,0 +1,27 @@
+# Шаблон systemd-сервиса для запуска отдельных экземпляров Apache.
+# %i — идентификатор экземпляра, который передаётся при запуске сервиса, например: httpd@instance1.service -> %i будет заменён на "instance1".
+[Unit]
+Description=Apache HTTP Server instance %i
+# Запускать сервис после инициализации сети.
+After=network.target
+# Также выражаем желание запустить network.target вместе с этим сервисом.
+Wants=network.target
+
+[Service]
+# Apache работает в foreground, поэтому systemd отслеживает основной процесс напрямую.
+Type=simple
+# Запуск Apache в foreground-режиме:
+# -DFOREGROUND — не переводить Apache в фоновый режим;
+# -f            — использовать указанный конфигурационный файл;
+# %i            — идентификатор экземпляра.
+ExecStart=/usr/sbin/httpd -DFOREGROUND -f /etc/httpd/conf.d/httpd-%i.conf
+# Перечитать конфигурацию и выполнить graceful-перезапуск. Текущие соединения завершаются корректно, после чего Apache начинает работать с новой конфигурацией.
+ExecReload=/usr/sbin/httpd -k graceful -f /etc/httpd/conf.d/httpd-%i.conf
+# Остановить конкретный экземпляр Apache.
+ExecStop=/usr/sbin/httpd -k stop -f /etc/httpd/conf.d/httpd-%i.conf
+# Использовать отдельный временный каталог /tmp для этого сервиса. Это изолирует временные файлы Apache от остальных процессов.
+PrivateTmp=true
+
+[Install]
+# Запускать экземпляр при переходе системы в обычный многопользовательский режим.
+WantedBy=multi-user.target
